@@ -1,0 +1,27 @@
+<template name="picture">
+  {{#if category}}
+    <h2 class="pinned {{author}}">
+      <span>{{author}}</span>
+      <button id="rename" title="Renommer {{author}} ?" class="btn btn-small"><i class="icon-pencil"></i></button>
+      <div class="btn-group">
+        <button id="small-mode" title="5 photos par ligne" class="btn btn-small {{smallMode}}"><i class="icon-th"></i></button>
+        <button id="large-mode" title="3 photos par ligne" class="btn btn-small {{largeMode}}"><i class="icon-th-large"></i></button>
+      </div>
+      <div class="btn-group">
+        <button title="Télécharger les photos de {{author}}" class="down btn btn-small" data-href="/archive/{{page}}/{{author}}.zip"><i class="icon-circle-arrow-down"></i></button>
+      </div>
+    </h2>
+  {{/if}}
+  <a href="#files/{{page}}/pictures/{{name}}?v={{v}}" data-fancybox-href="files/{{page}}/previews/{{name}}?v={{v}}" data-fancybox-group="pictures" style='background-image: url("files/{{page}}/thumbnails/{{name}}?v={{v}}")' class='{{orientation}}'>
+    {{#if loadMore}}
+      <img src="lib/load-more.png?v=2">
+    {{else}}
+      <button id="delete" class="btn btn-small" title="Supprimer"><i class="icon-remove-sign"></i></button>
+      <button id="turn-right" class="btn btn-small" title="Tourner vers la droite"><i class="icon-share-alt"></i></button>
+      <button id="turn-left" class="btn btn-small" title="Tourner vers la gauche"><i class="icon-share-alt reverse"></i></button>
+      <div class="info">
+        <span class="label right" title="Date de la photo">{{pretty date}}</span>
+      </div>
+    {{/if}}
+  </a>
+</template>

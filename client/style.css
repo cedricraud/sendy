@@ -1,0 +1,409 @@
+@import url(http://fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps);
+
+body {
+  text-align: center;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background-color: #F1F1F1 !important;
+}
+.app {
+  text-align: center;
+  width: 810px;
+  padding: 0;
+  margin: auto;
+  //background-color: #f1f1f1;
+  //border: 1px solid #e5e5e5;
+  border-top-width: 0;
+  //box-shadow: 0 0 20px rgba(125, 125, 125, 0.07);
+}
+.app h1, .app h2 {
+  cursor: default;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.app h1 {
+  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-weight: 300;
+  font-size: 70px;
+  background-position: bottom center;
+  height: 100px;
+  line-height: 100px;
+  text-shadow: 2px 2px 2px rgba(125, 125, 125, 0.5);
+  color: #333;
+  margin: 0 -1px 10px -1px;
+}
+.app h2 {
+  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-weight: 300;
+  font-size: 25px;
+  margin: 0;
+  background: #F1F1F1;
+  width: 800px !important;
+  position: absolute;
+  z-index: 2;
+}
+.app h2 span {
+  margin-left: 5px;
+}
+.app h2 #rename {
+  margin-top: -6px;
+  display: none;
+}
+.app h2 .btn-group {
+  float: right;
+  margin-left: 0;
+  margin-right: 10px;
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 500ms;
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 500ms;
+  transition-property: opacity;
+  transition-duration: 500ms;
+}
+.app h2:hover .btn-group {
+  opacity: 1;
+}
+.app hr {
+  margin: 1em 0;
+  border-color: #e5e5e5;
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+.pictures {
+  text-align: left;
+  margin-left: 5px;
+}
+.pictures hr {
+  margin-left: -5px;
+}
+.pictures a {
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
+  width: 230px;
+  height: 230px;
+  margin: 7px;
+  text-align: right;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  background-position: center center;
+  border: 10px solid white;
+  box-shadow: 1px 2px 2px #e5e5e5;
+}
+.pictures a:hover {
+  text-decoration: none;
+}
+.pictures a.v {
+  background-size: 100% auto;
+}
+.pictures .info {
+  cursor: pointer;
+  position: relative;
+  top: 209px;
+  left: -106px;
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 400ms;
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 400ms;
+  transition-property: opacity;
+  transition-duration: 400ms;
+  opacity: 0;
+}
+.pictures .info .left {
+  margin-left: 3px;
+  float: left;
+}
+.pictures .info .right {
+  margin-right: 3px;
+  float: right;
+}
+.pictures .info .label {
+  background-color: white;
+  //background-color: #EEE;
+  color: #333;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
+}
+.pictures a img {
+  float: left;
+  width: 100%;
+}
+.pictures a button {
+  float: right;
+  cursor: pointer;
+  //border-radius: 15px;
+  padding: 0px 2px;
+  width: 20px;
+  height: 20px;
+  line-height: 0.5em;
+  margin: 3px;
+  visibility: hidden;
+}
+.pictures a button i.reverse {
+  -moz-transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+/* Boostrap */
+/* https://gist.github.com/nodesocket/5843712*/
+.well, .navbar-inner, .popover, .btn, .tooltip, input, select, textarea, pre, .progress, .modal, .add-on, .alert, .table-bordered, .nav>.active>a, .dropdown-menu, .tooltip-inner, .badge, .label, .img-polaroid {
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-border-radius: 0px !important;
+  -moz-border-radius: 0px !important;
+  border-radius: 0px !important;
+  border-collapse: collapse !important;
+  background-image: none !important;
+}
+.btn {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  border-color: #ccc !important;
+  //border-color: rgb(230, 230, 230) rgb(230, 230, 230) rgb(205, 205, 205) !important;
+  background-image: linear-gradient(to bottom,rgb(250, 250, 250),rgb(230, 230, 230)) !important;
+  box-shadow: none !important;
+}
+.btn.active {
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15) !important;
+}
+.btn:hover {
+  border-color: #AAA !important;
+  //border-color: rgba(82,168,236,0.8) !important;
+  //border-color: rgb(230, 230, 230) rgb(230, 230, 230) rgb(205, 205, 205) !important;
+  background-position: 0 0 !important;
+}
+input:focus {
+  border-color: #ccc !important;
+}
+/* Edit */
+.edit .pictures a button {
+  visibility: visible;
+}
+.edit form .edit {
+  /* Apply the active style manually */
+  color: #333;
+  background-color: #E6E6E6;
+  background-image: none;
+  outline: 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+.edit .pictures #rename {
+  display: inline-block;
+}
+.pictures a:hover .info {
+  opacity: 1;
+}
+.pictures.small a {
+  width: 130px;
+  height: 130px;
+  margin: 6px;
+  border-width: 7px;
+}
+.pictures.small .info {
+  top: 109px;
+  left: -6px;
+}
+
+/* Player */ 
+.app .player {
+  visibility: hidden;
+}
+.app .player iframe {
+  width: 500px;
+  height: 80px;
+}
+
+/* Footer */
+.app footer {
+  padding: 20px;
+  min-height: 30px;
+}
+.app .floating {
+  position: fixed;
+  z-index: 2;
+  top: -30px;
+  width: 770px;
+}
+.app .busy {
+  height: 20px;
+  line-height: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(255, 255, 225, 0.7);
+}
+.app .busy .progress {
+  width: 100px;
+  display: inline-block;
+  margin: 0 5px 0 0;
+  height: 9px;
+}
+/* Upload */
+.upload .floating {
+  position: relative;
+}
+.upload .pictures {
+  display: none;
+}
+.canvas {
+  display: none;
+}
+.upload #canvas-placeholder {
+  height: 265px;
+}
+.upload .canvas {
+  display: block;
+  height: 200px;
+  border: 10px solid rgb(255, 255, 255);
+  box-shadow: 1px 2px 2px rgb(229, 229, 229);
+  margin: 30px auto 20px;
+  position: relative;
+  top: -335px;
+}
+/* Form */
+.app form {
+  margin-bottom: 1em;
+  -user-select: none;
+}
+.app form .add, .app form .edit, .app form .download {
+  height: 18px;
+  padding: 3px 8px 5px 8px;
+}
+.app #name {
+  display: none;
+  width: 70px;
+  height: 18px;
+}
+.app .add {
+  overflow: hidden;
+  width: 142px;
+  position: relative;
+}
+.app .add .icon-plus-sign {
+  opacity: 0;
+  margin-left: -18px;
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 750ms;
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 750ms;
+  transition-property: opacity;
+  transition-duration: 750ms;
+}
+.app .add .icon-picture {
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 250ms;  
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 250ms;  
+  transition-property: opacity;
+  transition-duration: 250ms;  
+}
+.app .add:hover .icon-plus-sign {
+  opacity: 1;
+}
+.app .add:hover .icon-picture {
+  opacity: 0;
+}
+.app .add input {
+  position: relative;
+  z-index: 3;
+  opacity: 0;
+  margin-left: -5px;
+  margin-top: -41px;
+  width: 150px;
+}
+
+/* Fancy Box */
+.fancybox-overlay {
+  background: #F1F1F1 !important;
+}
+.fancybox-opened .fancybox-skin {
+  box-shadow: 2px 4px 4px #e5e5e5 !important;
+}
+#fancybox-loading {
+  background: black !important;
+  border-radius: 5px;
+}
+
+/* Home */
+.home {
+  width: 500px;
+}
+.home .delete {
+  border-radius: 15px;
+  padding: 0px 2px;
+  width: 20px;
+  height: 20px;
+  line-height: 0.5em;
+  margin: 3px;
+  position: relative;
+  margin-top: -50px;
+  margin-left: -7px;
+  //display: none;
+}
+.home form {
+  padding: 10px;
+}
+.home form input {
+  //font-family: 'Oleo Script Swash Caps', cursive;
+  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  width: 150px;
+}
+.home h1 {
+  text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.9);
+  padding: 5px 15px 20px;
+  height: 90px;
+  line-height: 90px;
+  background-color: transparent;
+}
+.home a:focus {
+  outline: none;
+}
+.home .circle {
+  margin: auto;
+  width: 200px;
+  height: 200px;
+  border-radius: 150px;
+  background: white;
+}
+.home .circle p {
+  position: relative;
+  top: 70px;
+}
+
+/* Responsive */
+@media only screen and (max-width: 810px) {
+  .app {
+    width: 485px;
+  }
+  .app h2 {
+    width: 480px !important;
+  }
+  .app .floating {
+    width: 445px;
+  }
+  .pictures.large a {
+    width: 200px;
+    height: 200px;
+  }
+  a .info {
+    display: none !important;
+  }
+}
+
+/* Custom */
+.berlin h1 {
+  color: white;
+  font-family: 'Oleo Script Swash Caps', cursive;
+  text-shadow: 2px 2px 2px rgba(200, 0, 125, 0.9);
+}
+
+.corsica h1 {
+  height: 120px;
+  background-position: 0px -59px;
+  color: #FFF;
+  font-size: 50px;
+  line-height: 95px;
+  text-shadow: 0px 2px 2px rgba(0, 125, 125, 0.3);
+}

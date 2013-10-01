@@ -1,0 +1,10 @@
+<template name="admin">
+<div class="app home">
+  {{#each this}}
+    <h1>
+      <a id="{{name}}" href="{{name}}">{{ucwords name}}</a>
+      <button class="btn delete" class="btn btn-small" title="Supprimer"><i class="icon-remove-sign"></i></button>
+    </h1>
+  {{/each}}
+</div>
+</template>

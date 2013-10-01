@@ -1,0 +1,43 @@
+<template name="page">
+<div class="app {{page}}">
+  <h1 style='background-image: url("files/{{page}}/header.jpg")'>{{ucwords page}}</h1>
+  <div class="pictures {{mode}}">
+    {{#each pictures}}
+        {{> picture}}
+    {{/each}}
+  </div>
+  <footer>
+    {{#if busy}}
+      <div class="floating">
+        <div class="busy badge badge-info">
+          <div class="progress progress-striped active">
+            <div class="bar" style="width: {{progress}}px;"></div>
+          </div>
+          {{busy}}
+        </div>
+      </div>
+      <div id="canvas-placeholder"></div>
+    {{else}}
+    <form class="form-inline control-group {{form_status}}">
+      <input type="text" id="name" placeholder="Prénom" value="{{author}}"/>
+      <a class="add btn">
+        <i class="icon-picture"></i>
+        <i class="icon-plus-sign"></i>
+        Ajouter mes photos
+        <input type=file id="files" multiple="multiple" />
+      </a>
+      {{#if isNotEmpty}}
+      <a class="edit btn btn-small">
+        <i class="icon-pencil"></i>
+        Modifier
+      </a>
+      <a class="download btn" href="/archive/{{page}}.zip">
+        <i class="icon-circle-arrow-down"></i>
+        Télécharger
+      </a>
+      {{/if}}
+    </form>
+    {{/if}}
+  </footer>
+</div>
+</template>
