@@ -1,11 +1,12 @@
 # Sendy
 
-[Sendy](http://sendy:2013) is the easiest way to share pictures between friends.
+[Sendy](http://sendy.io:2013) is the easiest way to share pictures between friends.
 
 Sendy is built with [Meteor](http://www.meteor.com) and can be easily deployed on a private web server.
 
 ## Requirements
 
+- [Node.js](http://nodejs.org)
 - [Meteorite](https://github.com/oortcloud/meteorite)
 - [Image Magick](http://www.imagemagick.org)
 
@@ -28,9 +29,11 @@ Meteorite will setup Meteor automatically and install all the dependencies of th
 
 * New name for the app: Berlin is now Sendy! “Hi Sendy!”
 * Migrate from Meteor 0.6.2 to 0.6.5
-* Seperate client/server code
+* Better client/server architecture
 * Use packages.json to declare npm dependencies
 * Replace Router by IronRouter
+* Improve logs
+* Clean all the mess
 
 0.6
 
