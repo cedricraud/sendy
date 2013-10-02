@@ -245,7 +245,7 @@ Meteor.methods({
         name = name.substring(0, name.lastIndexOf('.')) + ' (1)' + name.substring(name.lastIndexOf('.'));
       }
     }
-    
+
     // Store picture
     fs.writeFile(pathTo(page, folder, name), blob, encoding, function(err) {
       if (err) {
