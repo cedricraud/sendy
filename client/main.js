@@ -20,17 +20,18 @@ Router.map(function() {
     waitOn: function() {
       var page = this.params.page;
       Session.set('page', page);
-
-      console.log('Page: ' + page);
       
+      // Set Pictures upload settings
       document.title = ucwords(page);
       if ((isHd = !!location.href.match(/hd/i))) {
         document.title += ' (hd)';
       }
-
       maxSize = isHd ? 2500 : 960;
       quality = isHd ? 1 : 0.9;
       console.log('Hd:', isHd, 'Quality:', quality, 'MaxSize:', maxSize);
+
+      // Filter by author
+      Session.set('authorFilter', this.params.author);
 
       return Meteor.subscribe("pictures", page);
     },
@@ -125,6 +126,10 @@ var optimizePicture = function(file, callback) {
   });
 };
 
+var expandAuthor = function(author) {
+  Session.set('category-' + author, true);
+};
+
 Template.picture.helpers({
   pretty: function(date) {
     return moment(date).format('DD/MM');
@@ -156,23 +161,26 @@ Template.page.pictures = function () {
   var lastCategory = null;
   var categoryCount = 0;
   var categoryLength = 9;
+  var authorFilter = Session.get('authorFilter');
 
   this.rewind();
   this.forEach(function(picture) {
-    if (picture.author != lastCategory) {
-      lastCategory = picture.author;
-      picture.category = lastCategory;
-      categoryCount = 0;
-    }
-    if (categoryCount < categoryLength) {
-      results.push(picture);
-      categoryCount++;
-    } else if (Session.get('category-' + lastCategory)) {
-      results.push(picture);
-    } else if (categoryCount == categoryLength) {
-      picture.loadMore = true;
-      results.push(picture);
-      categoryCount++;
+    if (!authorFilter || picture.author == authorFilter) {
+      if (picture.author != lastCategory) {
+        lastCategory = picture.author;
+        picture.category = lastCategory;
+        categoryCount = 0;
+      }
+      if (categoryCount < categoryLength) {
+        results.push(picture);
+        categoryCount++;
+      } else if (authorFilter || Session.get('category-' + lastCategory)) {
+        results.push(picture);
+      } else if (categoryCount == categoryLength) {
+        picture.loadMore = true;
+        results.push(picture);
+        categoryCount++;
+      }
     }
   });
 
@@ -206,7 +214,6 @@ Template.page.mode = function() {
 };
 
 Template.page.rendered = function() {
-  console.log('App rendered');
   if (!Session.get('rendered')) {
     console.log('FANCYBOX');
     $('.pictures a').fancybox();
@@ -229,7 +236,7 @@ Template.picture.events({
     if (this.loadMore) {
       ev.preventDefault();
       ev.stopPropagation();
-      Session.set('category-' + this.author, true);
+      expandAuthor(this.author);
     } else if (ev.ctrlKey || ev.metaKey) {
       window.open(ev.target.hash.replace('#', '/'));
       ev.stopPropagation();
@@ -319,6 +326,7 @@ Template.page.events({
     var upload = function(files, index) {
       if (index >= files.length) {
         // The end.
+        Meteor.finalizeUpload(files.length);
         Session.set('busy', 'Envoi terminé.');
         Session.set('progress', 100);
         setTimeout(function() {
@@ -438,4 +446,11 @@ Meteor.saveFile = function(name, blob, metadata, callback) {
   };
 
   fileReader.readAsBinaryString(blob);
+};
+
+Meteor.finalizeUpload = function(count) {
+  Meteor.call('finalizeUpload',
+            Session.get('page'),
+            BerlinSession.get('author'),
+            count);
 };

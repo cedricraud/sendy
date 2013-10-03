@@ -6,6 +6,5 @@
 standard-app-packages
 preserve-inputs
 iron-router
-npm
 routepolicy
 amplify

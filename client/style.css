@@ -392,6 +392,11 @@ input:focus {
   }
 }
 
+/* Screenshot */
+.screenshot .btn {
+  display: none;
+}
+
 /* Custom */
 .berlin h1 {
   color: white;

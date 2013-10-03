@@ -2,7 +2,9 @@ var folder = 'pictures',
     previewFolder = 'previews',
     thumbFolder = 'thumbnails',
     trashFolder = 'trash',
-    root;
+    root,
+    smtp,
+    smtpOptions;
 
 // Publications
 Meteor.publish("pictures", function (page) {
@@ -22,6 +24,8 @@ var require = Npm.require,
     im = require('imagemagick'),
     mkdirp = require('mkdirp'),
     moment = require('moment'),
+    nodemailer = require('nodemailer'),
+    phantom = require('phantom'),
     slug = require('slug'),
     zipstream = require('zipstream');
 
@@ -34,6 +38,23 @@ Meteor.startup(function () {
 
   if (root) {
       if (fs.existsSync(root)) {
+      // Init Mailer
+      if (process.env.SENDY_MAILER_EMAIL && process.env.SENDY_MAILER_PASSWORD && process.env.SENDY_ADMIN_EMAIL) {
+        smtpOptions = {
+          user: process.env.SENDY_MAILER_EMAIL,
+          pass: process.env.SENDY_MAILER_PASSWORD,
+          admin: process.env.SENDY_ADMIN_EMAIL,
+        };
+        smtp = nodemailer.createTransport("SMTP", {
+          service: "Gmail",
+          auth: smtpOptions
+        });
+
+        log('Mailer: ' + smtpOptions.user);
+      } else {
+        log('Mailer: disabled');
+      }
+
       // Route Files
       RoutePolicy.declare('/files', 'network');
       WebApp.connectHandlers.use('/files', filesHandler(root));
@@ -58,20 +79,26 @@ Meteor.startup(function () {
 });
 
 Meteor.loadPages = function() {
-  Pages.find().forEach(function(page) {
-    var path = process.env.SENDY_PICTURES_PATH + '/' + page.name;
+  var pictures = Pages.find();
 
-    log('• ' + page.name + ' (' + Pictures.find({page: page.name}).count() + ' pics)');
+  if (pictures.count() > 0) {
+    pictures.forEach(function(page) {
+      var path = process.env.SENDY_PICTURES_PATH + '/' + page.name;
 
-    if (!fs.existsSync(path)) {
-      log('Create missing folder: ' + page.name);
-      mkdirp.sync(path);
-      mkdirp.sync(path + '/' + folder);
-      mkdirp.sync(path + '/' + previewFolder);
-      mkdirp.sync(path + '/' + thumbFolder);
-      mkdirp.sync(path + '/' + trashFolder);
-    }
-  });
+      log('• ' + page.name + ' (' + Pictures.find({page: page.name}).count() + ' pics)');
+
+      if (!fs.existsSync(path)) {
+        log('Create missing folder: ' + page.name);
+        mkdirp.sync(path);
+        mkdirp.sync(path + '/' + folder);
+        mkdirp.sync(path + '/' + previewFolder);
+        mkdirp.sync(path + '/' + thumbFolder);
+        mkdirp.sync(path + '/' + trashFolder);
+      }
+    });
+  } else {
+    log('• No page yet');
+  }
 };
 
 var pathTo = function(page, folder, file) {
@@ -95,6 +122,32 @@ var log = function(message, page, author) {
     message);
 };
 
+// Screenshot
+var sayCheese = function(page, author, callback) {
+  phantom.create(function(ph) {
+    ph.createPage(function(p) {
+      p.set('viewportSize', { width: 750 });
+      p.set('settings.webSecurityEnabled', false);
+      p.open(Meteor.absoluteUrl(page + '?author=' + encodeURIComponent(author), { replaceLocalhost: true}), function(status) {
+        setTimeout(function() {
+          log('Taking Screenshot', page, author);
+          p.evaluate(function() {
+            $('body').addClass('screenshot');
+          });
+          p.render(root + '/' + page + '/screenshot.png');
+          ph.exit();
+          callback();
+        }, 500);
+      });
+    });
+  });
+};
+
+// Handlers
+var filesHandler = function(path) {
+  return connect.static(path, { maxAge: 86400000 });
+};
+
 var downThemAll = function(res, name, files) {
   var zip = zipstream.createZip({ level: 1 });
   res.setHeader('Content-Type', 'application/octet-stream');
@@ -110,11 +163,6 @@ var downThemAll = function(res, name, files) {
     else
       zip.finalize();
   })();
-};
-
-// Handlers
-var filesHandler = function(path) {
-  return connect.static(path, { maxAge: 86400000 });
 };
 
 var archiveHandler = function (req, res, next) {
@@ -264,8 +312,6 @@ Meteor.methods({
         var orientation = 'h';
 
         log('Adding ' + name, page, author);
-        console.log(JSON.stringify(metadata));
-        console.log(metadata.width + ' - ' + metadata.height + ' - ' + metadata.date);
 
         if (metadata.width < metadata.height) {
           orientation = 'v';
@@ -308,5 +354,25 @@ Meteor.methods({
       }
     });
     return fut.wait();
+  },
+
+  finalizeUpload: function(page, author, count) {
+    log('Uploaded pictures: ' + count, page, author);
+
+    if (smtp) {
+      sayCheese(page, author, function() {
+        var s = count > 1 ? 's' : '';
+
+        smtp.sendMail({
+          subject: author + ' vient d\'ajouter ' + count + ' nouvelle' + s + ' photo' + s,
+          from: 'Sendy <' + smtpOptions.user + '>',
+          to: smtpOptions.admin,
+          html: '<body style="margin: 0px; padding: 0px;"><table style="background-color: #F1F1F1;width:100%:text-align:center;margin:0"><img src="' + Meteor.absoluteUrl('files/' + page + '/screenshot.png')+ '"></table></body>',
+          forceEmbeddedImages: true
+        }, function(err, message) {
+          if (!err) log('Email sent!', page, author);
+        });
+      });
+    }
   }
 });
