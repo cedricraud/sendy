@@ -1,6 +1,15 @@
 <template name="page">
 <div class="app {{page}}">
   <h1 style='background-image: url("files/{{page}}/header.jpg")'>{{ucwords page}}</h1>
+  {{#if isAdmin}}
+  <form class="form-inline control-group admin">
+    <label><i class="icon-fire"></i> Admin : </label>
+    <a class="edit btn btn-small">
+      <i class="icon-pencil"></i>
+      Modifier
+    </a>
+  </form>
+  {{/if}}
   <div class="pictures {{mode}}">
     {{#each pictures}}
         {{> picture}}
@@ -19,7 +28,8 @@
       <div id="canvas-placeholder"></div>
     {{else}}
     <form class="form-inline control-group {{form_status}}">
-      <input type="text" id="name" placeholder="Prénom" value="{{author}}"/>
+      <input type="text" id="user-name" placeholder="Prénom" value="{{author}}"/>
+      <input type="email" id="user-email" placeholder="Email" value="{{email}}"/>
       <a class="add btn">
         <i class="icon-picture"></i>
         <i class="icon-plus-sign"></i>
@@ -27,10 +37,6 @@
         <input type=file id="files" multiple="multiple" />
       </a>
       {{#if isNotEmpty}}
-      <a class="edit btn btn-small">
-        <i class="icon-pencil"></i>
-        Modifier
-      </a>
       <a class="download btn" href="/archive/{{page}}.zip">
         <i class="icon-circle-arrow-down"></i>
         Télécharger

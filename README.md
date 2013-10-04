@@ -21,7 +21,7 @@ $ cd sendy
 $ export SENDY_PICTURES_PATH=<absolute_path_to_upload_folder>
 $ export SENDY_MAILER_EMAIL=<gmail_email_of_sender>
 $ export SENDY_MAILER_PASSWORD=<gmail_password_of_sender>
-$ export SENDY_ADMIN_EMAIL=<email_of_admin>
+$ export SENDY_HOST=<public_host_of_app>
 $ mrt
 ```
 
@@ -31,8 +31,9 @@ Meteorite will setup Meteor automatically and install all the dependencies of th
 
 0.8 “Wedding”
 
-* Email notifications of new pictures
-* We can now filter a page by author (via url ?author=name)
+* Admin mode!
+* Emails!
+* Filter a page by author (via url ?author=name)
 
 0.7
 

@@ -271,11 +271,18 @@ input:focus {
   height: 18px;
   padding: 3px 8px 5px 8px;
 }
-.app #name {
+.app form #user-name {
   display: none;
-  width: 70px;
+  width: 80px;
   height: 18px;
 }
+
+.app form #user-email {
+  display: none;
+  width: 160px;
+  height: 18px;
+}
+
 .app .add {
   overflow: hidden;
   width: 142px;
@@ -314,6 +321,12 @@ input:focus {
   width: 150px;
 }
 
+.app form.admin {
+  background-color: white;
+  display: inline-block;
+  padding: 5px;
+}
+
 /* Fancy Box */
 .fancybox-overlay {
   background: #F1F1F1 !important;
@@ -328,7 +341,7 @@ input:focus {
 
 /* Home */
 .home {
-  width: 500px;
+  width: 800px;
 }
 .home .delete {
   border-radius: 15px;
@@ -346,9 +359,12 @@ input:focus {
   padding: 10px;
 }
 .home form input {
-  //font-family: 'Oleo Script Swash Caps', cursive;
   font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   width: 150px;
+}
+.home form #email {
+  width: 234px;
+  margin-bottom: 5px;
 }
 .home h1 {
   text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.9);
@@ -376,6 +392,9 @@ input:focus {
 @media only screen and (max-width: 810px) {
   .app {
     width: 485px;
+  }
+  .app h1 {
+    font-size: 50px;
   }
   .app h2 {
     width: 480px !important;

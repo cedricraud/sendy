@@ -1,17 +1,14 @@
 var folder = 'pictures',
     previewFolder = 'previews',
     thumbFolder = 'thumbnails',
-    trashFolder = 'trash',
-    root,
-    smtp,
-    smtpOptions;
+    trashFolder = 'trash';
 
 // Publications
-Meteor.publish("pictures", function (page) {
+Meteor.publish('pictures', function (page) {
   return Pictures.find({page: page});
 });
 
-Meteor.publish("pages", function (page) {
+Meteor.publish('pages', function (page) {
   return Pages.find({});
 });
 
@@ -25,9 +22,24 @@ var require = Npm.require,
     mkdirp = require('mkdirp'),
     moment = require('moment'),
     nodemailer = require('nodemailer'),
-    phantom = require('phantom'),
     slug = require('slug'),
     zipstream = require('zipstream');
+
+// Shared Npm
+phantom = require('phantom');
+
+// Shared vars
+root = '';
+host = '';
+smtp = {};
+smtpOptions = {};
+
+// Shared Methods
+log = function(message, page, author) {
+  console.log((page ? '[' + ucwords(page) + ']' : '') +
+    (author ? '[' + author + '] ' : ' ') +
+    message);
+};
 
 // App
 Meteor.startup(function () {
@@ -35,18 +47,19 @@ Meteor.startup(function () {
   log('Hi, I\'m Sendy');
 
   root = process.env.SENDY_PICTURES_PATH;
+  host = process.env.SENDY_HOST;
 
-  if (root) {
+  if (root && host) {
       if (fs.existsSync(root)) {
       // Init Mailer
-      if (process.env.SENDY_MAILER_EMAIL && process.env.SENDY_MAILER_PASSWORD && process.env.SENDY_ADMIN_EMAIL) {
+      if (process.env.SENDY_MAILER_EMAIL && process.env.SENDY_MAILER_PASSWORD) {
         smtpOptions = {
           user: process.env.SENDY_MAILER_EMAIL,
-          pass: process.env.SENDY_MAILER_PASSWORD,
-          admin: process.env.SENDY_ADMIN_EMAIL,
+          pass: process.env.SENDY_MAILER_PASSWORD
         };
         smtp = nodemailer.createTransport("SMTP", {
           service: "Gmail",
+          debug: false,
           auth: smtpOptions
         });
 
@@ -73,7 +86,9 @@ Meteor.startup(function () {
       log('Error: SENDY_PICTURES_PATH is not a valid folder');
     }
   } else {
-    log('Error: missing SENDY_PICTURES_PATH environment variable (absolute path to folder where the pictures will be stored');
+    log('Error: missing environment variable(s)');
+    log('SENDY_HOST: public host of the web app');
+    log('SENDY_PICTURES_PATH: absolute path to folder on the disk where the pictures will be stored');
   }
 
 });
@@ -114,33 +129,6 @@ var cleanPath = function(str) {
 
 var cleanName = function(str) {
   return str.replace(/\.\./g,'').replace(/\//g,'').replace(/"/g,'');
-};
-
-var log = function(message, page, author) {
-  console.log((page ? '[' + ucwords(page) + ']' : '') +
-    (author ? '[' + author + '] ' : ' ') +
-    message);
-};
-
-// Screenshot
-var sayCheese = function(page, author, callback) {
-  phantom.create(function(ph) {
-    ph.createPage(function(p) {
-      p.set('viewportSize', { width: 750 });
-      p.set('settings.webSecurityEnabled', false);
-      p.open(Meteor.absoluteUrl(page + '?author=' + encodeURIComponent(author), { replaceLocalhost: true}), function(status) {
-        setTimeout(function() {
-          log('Taking Screenshot', page, author);
-          p.evaluate(function() {
-            $('body').addClass('screenshot');
-          });
-          p.render(root + '/' + page + '/screenshot.png');
-          ph.exit();
-          callback();
-        }, 500);
-      });
-    });
-  });
 };
 
 // Handlers
@@ -200,7 +188,7 @@ var archiveHandler = function (req, res, next) {
 
 // Methods
 Meteor.methods({
-  createPage: function(title) {
+  createPage: function(title, email) {
     var page = cleanName(title);
 
     if (page == 'public') {
@@ -212,8 +200,11 @@ Meteor.methods({
     } else {
       log('Creating ' + page);
 
-      Pages.insert({name: page, title: title}, function() {
+      var secret = Math.floor((1 + Math.random()) * 0x100000).toString(16);
+      Pages.insert({name: page, title: title, email: email, secret: secret}, function() {
         Meteor.loadPages();
+
+        sendCreatePageMail(email, page, ucwords(title), secret);
       });
       return page;
     }
@@ -356,23 +347,11 @@ Meteor.methods({
     return fut.wait();
   },
 
-  finalizeUpload: function(page, author, count) {
+  finalizeUpload: function(name, author, email, count) {
     log('Uploaded pictures: ' + count, page, author);
 
-    if (smtp) {
-      sayCheese(page, author, function() {
-        var s = count > 1 ? 's' : '';
+    var page = Pages.findOne({name: name});
 
-        smtp.sendMail({
-          subject: author + ' vient d\'ajouter ' + count + ' nouvelle' + s + ' photo' + s,
-          from: 'Sendy <' + smtpOptions.user + '>',
-          to: smtpOptions.admin,
-          html: '<body style="margin: 0px; padding: 0px;"><table style="background-color: #F1F1F1;width:100%:text-align:center;margin:0"><img src="' + Meteor.absoluteUrl('files/' + page + '/screenshot.png')+ '"></table></body>',
-          forceEmbeddedImages: true
-        }, function(err, message) {
-          if (!err) log('Email sent!', page, author);
-        });
-      });
-    }
+    sendFinalizeUploadMail(page.email, name, author, 'spycam100@gmail.com', count);
   }
 });

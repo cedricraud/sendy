@@ -33,7 +33,11 @@ Router.map(function() {
       // Filter by author
       Session.set('authorFilter', this.params.author);
 
-      return Meteor.subscribe("pictures", page);
+      // Admin
+      Meteor.subscribe('pages');
+      Session.set('key', this.params.key);
+
+      return Meteor.subscribe('pictures', page);
     },
     data: function() {
       return Pictures.find({}, {sort: {author: 1, date: 1, name: 1}});
@@ -43,11 +47,11 @@ Router.map(function() {
 
 Meteor.startup(function () {
   console.log('App Started');
-  if (!BerlinSession.get('mode'))
-      BerlinSession.set('mode', 'small');
+  if (!SendySession.get('mode'))
+      SendySession.set('mode', 'small');
   Session.set('busy', false);
   Session.set('rendered', false);
-  console.log('Author: ' + BerlinSession.get('author'));
+  console.log('Author: ' + SendySession.get('author'));
 
   if (window.outerWidth < 485) {
     $('meta[name=viewport]').attr('content','width=485');
@@ -55,7 +59,7 @@ Meteor.startup(function () {
 });
 
 // Toolkit
-var BerlinSession = _.extend({}, Session, {
+var SendySession = _.extend({}, Session, {
   keys: _.object(_.map(amplify.store(), function (value, key) {
     return [key, JSON.stringify(value)];
   })),
@@ -141,15 +145,19 @@ Template.picture.busy = function() {
 };
 
 Template.picture.smallMode = function() {
-  return BerlinSession.equals('mode', 'small') ? 'active' : '';
+  return SendySession.equals('mode', 'small') ? 'active' : '';
 };
 
 Template.picture.largeMode = function() {
-  return BerlinSession.equals('mode', 'large') ? 'active' : '';
+  return SendySession.equals('mode', 'large') ? 'active' : '';
 };
 
 Template.picture.page = function() {
   return Session.get('page');
+};
+
+Template.page.isAdmin = function() {
+  return Pages.findOne({name: Session.get('page'), secret: Session.get('key')});
 };
 
 Template.page.isNotEmpty = function() {
@@ -157,13 +165,15 @@ Template.page.isNotEmpty = function() {
 };
 
 Template.page.pictures = function () {
+  this.rewind();
+
   var results = [];
   var lastCategory = null;
   var categoryCount = 0;
-  var categoryLength = 9;
+  var categoryMax = 9;
+  var categoryLength = this.count();
   var authorFilter = Session.get('authorFilter');
-
-  this.rewind();
+  
   this.forEach(function(picture) {
     if (!authorFilter || picture.author == authorFilter) {
       if (picture.author != lastCategory) {
@@ -171,12 +181,12 @@ Template.page.pictures = function () {
         picture.category = lastCategory;
         categoryCount = 0;
       }
-      if (categoryCount < categoryLength) {
+      if (categoryCount < categoryMax) {
         results.push(picture);
         categoryCount++;
       } else if (authorFilter || Session.get('category-' + lastCategory)) {
         results.push(picture);
-      } else if (categoryCount == categoryLength) {
+      } else if (categoryCount == categoryMax) {
         picture.loadMore = true;
         results.push(picture);
         categoryCount++;
@@ -202,7 +212,11 @@ Template.page.progress = function() {
 };
 
 Template.page.author = function () {
-  return BerlinSession.get('author');
+  return SendySession.get('author');
+};
+
+Template.page.email = function () {
+  return SendySession.get('email');
 };
 
 Template.page.page = function() {
@@ -210,7 +224,7 @@ Template.page.page = function() {
 };
 
 Template.page.mode = function() {
-  return BerlinSession.get('mode');
+  return SendySession.get('mode');
 };
 
 Template.page.rendered = function() {
@@ -279,10 +293,10 @@ Template.picture.events({
     ev.stopPropagation();
   },
   'click button#large-mode': function(ev) {
-    BerlinSession.set('mode', 'large');
+    SendySession.set('mode', 'large');
   },
   'click button#small-mode': function(ev) {
-    BerlinSession.set('mode', 'small');
+    SendySession.set('mode', 'small');
   },
   'click .down': function(evt) {
     window.open($(evt.currentTarget).data('href'));
@@ -302,16 +316,24 @@ Template.page.events({
     $('form').removeClass('error');
   },
   'click .add': function(evt) {
-    var name;
-    if ((name = prompt("Nom de l'album (ex : Cédric) : ", BerlinSession.get('author')))) {
-      if (name.length >= 3) {
-        BerlinSession.set('author', name);
+    if (!$('#user-name, #user-email').is(':visible')) {
+      $('#user-name, #user-email').animate({ width: 'show' }, 100);
+      $('#user-name').focus();
+      $('a.download').animate({ width: 'hide' }, 100);
+      evt.preventDefault();
+    }
+    else {
+      var name = $('#user-name').val();
+      var email = $('#user-email').val();
+      if (name.length >= 3 && email.length >= 3) {
+        SendySession.set('author', name);
+        SendySession.set('email', email);
+        $('#user-name, #user-email').animate({ width: 'hide' }, 100);
+        $('a.download').animate({ width: 'show' }, 100);
       } else {
-        alert('Le nom de l\'album doit faire au moins 3 caractères.');
+        alert('Le nom ou l\'email est invalide');
         evt.preventDefault();
       }
-    } else {
-      evt.preventDefault();
     }
   },
   'click .edit': function(ev) {
@@ -354,12 +376,29 @@ Template.page.events({
       }
     };
     upload(evt.target.files, 0);
-    Session.set('category-' + BerlinSession.get('author'), true);
+    Session.set('category-' + SendySession.get('author'), true);
     $('body').addClass('upload').scrollTop(0);
   }
 });
 
 Template.admin.events({
+  'click .create': function(evt) {
+    if ($('input#page').val().length >= 3) {
+      var email = $('input#email').val();
+      var page = $('input#page').val().toLowerCase();
+      if (email.length < 5 || page.length < 3) {
+        return;
+      }
+      Meteor.createPage(page, email, function(error, name) {
+        if (!name) {
+          alert('Cette galerie existe déjà.');
+        }
+      });
+      $('input').val('');
+    }
+    evt.stopPropagation();
+    evt.preventDefault();
+  },
   'click button.delete': function(evt) {
     if (confirm('Supprimer ' + this.name + ' ?')) {
       Meteor.deletePage(this._id);
@@ -369,28 +408,11 @@ Template.admin.events({
   }
 });
 
-Template.index.events({
-  'click .create': function(evt) {
-    if ($('input#page').val().length >= 3) {
-      var page = $('input#page').val().toLowerCase();
-      Meteor.createPage(page, function(error, name) {
-        if (name) {
-          Router.go('/' + name);
-        } else {
-          alert('Cette page existe déjà.');
-        }
-      });
-      $('input#page').val('');
-    }
-    evt.stopPropagation();
-    evt.preventDefault();
-  }
-});
-
 // Callbacks
-Meteor.createPage = function(page, callback) {
+Meteor.createPage = function(page, email, callback) {
   Meteor.call('createPage',
               page,
+              email,
               callback);
 };
 
@@ -405,7 +427,7 @@ Meteor.deletePage = function(id) {
 Meteor.renameAuthor = function(oldName, newName) {
   Meteor.call('renameAuthor',
               Session.get('page'),
-              BerlinSession.get('author'),
+              SendySession.get('author'),
               oldName,
               newName,
               function(error, data) {
@@ -416,7 +438,7 @@ Meteor.renameAuthor = function(oldName, newName) {
 Meteor.rotateFile = function(name, id, orientation, direction, callback) {
   Meteor.call('rotateFile',
               Session.get('page'),
-              BerlinSession.get('author'),
+              SendySession.get('author'),
               name,
               id,
               orientation,
@@ -427,7 +449,7 @@ Meteor.rotateFile = function(name, id, orientation, direction, callback) {
 Meteor.deleteFile = function(name, id) {
   Meteor.call('deleteFile',
               Session.get('page'),
-              BerlinSession.get('author'),
+              SendySession.get('author'),
               name,
               id);
 };
@@ -438,7 +460,7 @@ Meteor.saveFile = function(name, blob, metadata, callback) {
   fileReader.onload = function(file) {
     Meteor.call('saveFile',
                 Session.get('page'),
-                BerlinSession.get('author'),
+                SendySession.get('author'),
                 name,
                 file.target.result,
                 metadata,
@@ -451,6 +473,7 @@ Meteor.saveFile = function(name, blob, metadata, callback) {
 Meteor.finalizeUpload = function(count) {
   Meteor.call('finalizeUpload',
             Session.get('page'),
-            BerlinSession.get('author'),
+            SendySession.get('author'),
+            SendySession.get('email'),
             count);
 };
