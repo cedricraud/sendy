@@ -160,10 +160,11 @@ var archiveHandler = function (req, res, next) {
         var parts = url.split('/').map(function(item){return item.split('.');});
         var query = null;
         if(parts.length == 3 && parts[2].length == 2 && parts[2][1] == 'zip'){
-          query = {page:parts[1][0], author:parts[2][0]};
+          // TODO: Detect if validation is enabled
+          query = {validated: true, page:parts[1][0], author:parts[2][0]};
         }
         if(parts.length == 2 && parts[1].length == 2 && parts[1][1] == 'zip'){
-          query = {page:parts[1][0]};
+          query = {validated: true, page:parts[1][0]};
         }
         if (query) {
           var files = [];
@@ -214,6 +215,11 @@ Meteor.methods({
     Pages.remove(id);
   },
 
+  setPageMode: function(page, mode) {
+    log('Set page mode: ' + mode, page);
+    Pages.update({name: page}, {$set: {mode: mode}});
+  },
+
   renameAuthor: function(page, author, oldName, newName) {
     var fut = new Future();
 
@@ -224,6 +230,14 @@ Meteor.methods({
     });
 
     return fut.wait();
+  },
+
+  toggleValidation: function(id) {
+    var picture = Pictures.findOne(id);
+
+    if (picture) {
+      Pictures.update(id, {$set: {validated: !picture.validated}});
+    }
   },
 
   rotateFile: function(page, author, name, id, orientation, direction) {
@@ -348,10 +362,10 @@ Meteor.methods({
   },
 
   finalizeUpload: function(name, author, email, count) {
-    log('Uploaded pictures: ' + count, page, author);
+    log('Uploaded pictures: ' + count, name, author);
 
     var page = Pages.findOne({name: name});
 
-    sendFinalizeUploadMail(page.email, name, author, 'spycam100@gmail.com', count);
+    sendFinalizeUploadMail(page.email, name, page.secret, author, email, count);
   }
 });

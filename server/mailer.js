@@ -27,17 +27,17 @@ sayCheese = function(page, author, callback) {
   });
 };
 
-sendFinalizeUploadMail = function(to, page, author, email, count) {
+sendFinalizeUploadMail = function(to, page, secret, author, email, count) {
   if (smtp) {
     sayCheese(page, author, function() {
       var s = count > 1 ? 's' : '',
         amount = count > 1 ? count : 'une',
         html = '<body style="margin: 0px; padding: 0px;">'
           + author + ' (' + email + ') vient d\'ajouter ' + amount + ' photo' + s
-          + ' à la galerie : ' + publicUrl(page) + '<br><br>'
+          + ' à la galerie : ' + publicUrl(page, 'key=' + secret) + '<br><br>'
           + '<table bgcolor="#F1F1F1" width="100%" margin="0"><tr><td align="center">'
-          + '<img src="' + Meteor.absoluteUrl('files/' + encodeURIComponent(page) + '/screenshot.png')+ '">'
-          + '</td></tr></table></body>';
+          + '<img src="' + Meteor.absoluteUrl('files/' + encodeURIComponent(page)) + '/screenshot.png">'
+          + '</td></tr><tr><td style="color:#F1F1F1;">' + new Date + '</td></tr></table></body>';
 
       log('Sending email to ' + to, page, author);
 

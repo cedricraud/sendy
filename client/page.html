@@ -6,13 +6,27 @@
     <label><i class="icon-fire"></i> Admin : </label>
     <a class="edit btn btn-small">
       <i class="icon-pencil"></i>
-      Modifier
+      Édition
     </a>
+    <i class="icon-eye-open"></i> Mode :
+    <div class="btn-group">
+      <button id="page-mode-public" title="Toutes les photos sont visibles" class="btn {{pageModePublic}}">Public</button>
+      <button id="page-mode-validation" title="Seules les photos validées sont visibles" class="btn {{pageModeValidation}}">Validation</button>
+    </div>
   </form>
+  {{/if}}
+  {{#if isWaitingForValidation}}
+  <br>
+  <div class="well">
+    Merci ! <i class="icon-thumbs-up"></i>
+    <br>
+    <br>
+    Les photos seront publiées prochainement !
+  </div>
   {{/if}}
   <div class="pictures {{mode}}">
     {{#each pictures}}
-        {{> picture}}
+      {{> picture}}
     {{/each}}
   </div>
   <footer>

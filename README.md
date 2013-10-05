@@ -32,6 +32,7 @@ Meteorite will setup Meteor automatically and install all the dependencies of th
 0.8 “Wedding”
 
 * Admin mode!
+* Picture validation!
 * Emails!
 * Filter a page by author (via url ?author=name)
 

@@ -12,10 +12,11 @@
       </div>
     </h2>
   {{/if}}
-  <a href="#files/{{page}}/pictures/{{name}}?v={{v}}" data-fancybox-href="files/{{page}}/previews/{{name}}?v={{v}}" data-fancybox-group="pictures" style='background-image: url("files/{{page}}/thumbnails/{{name}}?v={{v}}")' class='{{orientation}}'>
+  <a href="#files/{{page}}/pictures/{{name}}?v={{v}}" data-fancybox-href="files/{{page}}/previews/{{name}}?v={{v}}" data-fancybox-group="pictures" style='background-image: url("files/{{page}}/thumbnails/{{name}}?v={{v}}")' class='{{orientation}} {{validationStatus}}'>
     {{#if loadMore}}
       <img src="lib/load-more.png?v=2">
     {{else}}
+      <button id="toggle-validation" class="btn btn-small"><i class="{{validationIcon}}"></i></button>
       <button id="delete" class="btn btn-small" title="Supprimer"><i class="icon-remove-sign"></i></button>
       <button id="turn-right" class="btn btn-small" title="Tourner vers la droite"><i class="icon-share-alt"></i></button>
       <button id="turn-left" class="btn btn-small" title="Tourner vers la gauche"><i class="icon-share-alt reverse"></i></button>

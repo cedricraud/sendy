@@ -194,9 +194,10 @@ input:focus {
 .edit .pictures #rename {
   display: inline-block;
 }
+/* FIXME: Positioning of info label (which contains the date) is broken so I disabled it
 .pictures a:hover .info {
   opacity: 1;
-}
+}*/
 .pictures.small a {
   width: 130px;
   height: 130px;
@@ -206,6 +207,14 @@ input:focus {
 .pictures.small .info {
   top: 109px;
   left: -6px;
+}
+
+/* Validation */
+.validation #toggle-validation {
+  visibility: visible;
+}
+.validation .pictures a.invalid {
+  opacity: 0.3;
 }
 
 /* Player */ 

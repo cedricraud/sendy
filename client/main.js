@@ -35,7 +35,9 @@ Router.map(function() {
 
       // Admin
       Meteor.subscribe('pages');
-      Session.set('key', this.params.key);
+      if (!!Pages.findOne({name: Session.get('page'), secret: this.params.key})) {
+        Session.set('isAdmin', true);
+      }
 
       return Meteor.subscribe('pictures', page);
     },
@@ -156,12 +158,35 @@ Template.picture.page = function() {
   return Session.get('page');
 };
 
+Template.picture.validationStatus = function() {
+  return this.validated ? 'valid' : 'invalid';
+};
+
+Template.picture.validationIcon = function() {
+  return this.validated ? 'icon-eye-open' : 'icon-eye-close';
+};
+
 Template.page.isAdmin = function() {
-  return Pages.findOne({name: Session.get('page'), secret: Session.get('key')});
+  return Session.get('isAdmin');
 };
 
 Template.page.isNotEmpty = function() {
   return Session.get('picturesCount');
+};
+
+Template.page.isWaitingForValidation = function() {
+  return Session.get('uploadedCount') > Session.get('picturesCount') && !Session.get('busy');
+};
+
+Template.page.pageModePublic = function() {
+  return Pages.findOne({name: Session.get('page')}).mode != 'validation' ? 'active' : '';
+};
+
+Template.page.pageModeValidation = function() {
+  var validation = Pages.findOne({name: Session.get('page')}).mode == 'validation';
+
+  $('body').toggleClass('validation', validation);
+  return validation ? 'active' : '';
 };
 
 Template.page.pictures = function () {
@@ -173,9 +198,11 @@ Template.page.pictures = function () {
   var categoryMax = 9;
   var categoryLength = this.count();
   var authorFilter = Session.get('authorFilter');
+  var isAdmin = Session.get('isAdmin');
+  var isValidated = Pages.findOne({name: Session.get('page')}).mode == 'validation';
   
   this.forEach(function(picture) {
-    if (!authorFilter || picture.author == authorFilter) {
+    if ((!authorFilter && (isAdmin || (!isValidated || picture.validated))) || picture.author == authorFilter) {
       if (picture.author != lastCategory) {
         lastCategory = picture.author;
         picture.category = lastCategory;
@@ -292,6 +319,11 @@ Template.picture.events({
     ev.preventDefault();
     ev.stopPropagation();
   },
+  'click button#toggle-validation': function(ev) {
+    Meteor.toggleValidation(this._id);
+    ev.preventDefault();
+    ev.stopPropagation();
+  },
   'click button#large-mode': function(ev) {
     SendySession.set('mode', 'large');
   },
@@ -336,7 +368,7 @@ Template.page.events({
       }
     }
   },
-  'click .edit': function(ev) {
+  'click .edit': function(evt) {
     $('body').toggleClass('edit');
   },
   'click .download': function(evt) {
@@ -349,6 +381,7 @@ Template.page.events({
       if (index >= files.length) {
         // The end.
         Meteor.finalizeUpload(files.length);
+        Session.set('uploadedCount', files.length);
         Session.set('busy', 'Envoi terminé.');
         Session.set('progress', 100);
         setTimeout(function() {
@@ -378,7 +411,17 @@ Template.page.events({
     upload(evt.target.files, 0);
     Session.set('category-' + SendySession.get('author'), true);
     $('body').addClass('upload').scrollTop(0);
-  }
+  },
+  'click button#page-mode-public': function(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    Meteor.setPageMode('public');
+  },
+  'click button#page-mode-validation': function(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    Meteor.setPageMode('validation');
+  },
 });
 
 Template.admin.events({
@@ -424,6 +467,15 @@ Meteor.deletePage = function(id) {
   });
 };
 
+Meteor.setPageMode = function(mode) {
+  Meteor.call('setPageMode',
+              Session.get('page'),
+              mode,
+              function(error, data) {
+    // great
+  });
+};
+
 Meteor.renameAuthor = function(oldName, newName) {
   Meteor.call('renameAuthor',
               Session.get('page'),
@@ -432,6 +484,14 @@ Meteor.renameAuthor = function(oldName, newName) {
               newName,
               function(error, data) {
     // awesome
+  });
+};
+
+Meteor.toggleValidation = function(id) {
+  Meteor.call('toggleValidation',
+              id,
+              function(error, data) {
+    // mega cool
   });
 };
 
