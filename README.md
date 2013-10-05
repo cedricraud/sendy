@@ -10,6 +10,7 @@ Sendy is built with [Meteor](http://www.meteor.com) and can be easily deployed o
 - [Meteor](https://www.meteor)
 - [Meteorite](https://github.com/oortcloud/meteorite)
 - [Image Magick](http://www.imagemagick.org)
+- [PhantomJS](http://phantomjs.org)
 
 ## Installation
 
