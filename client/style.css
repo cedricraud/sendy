@@ -24,7 +24,7 @@ body {
   user-select: none;
 }
 .app h1 {
-  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-family: 'HelveticaNeue-Light', 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   font-weight: 300;
   font-size: 70px;
   background-position: bottom center;
@@ -35,7 +35,7 @@ body {
   margin: 0 -1px 10px -1px;
 }
 .app h2 {
-  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-family: 'HelveticaNeue-Light', 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   font-weight: 300;
   font-size: 25px;
   margin: 0;
@@ -217,7 +217,7 @@ input:focus {
   opacity: 0.3;
 }
 
-/* Player */ 
+/* Player */
 .app .player {
   visibility: hidden;
 }
@@ -309,11 +309,11 @@ input:focus {
 }
 .app .add .icon-picture {
   -moz-transition-property: opacity;
-  -moz-transition-duration: 250ms;  
+  -moz-transition-duration: 250ms;
   -webkit-transition-property: opacity;
-  -webkit-transition-duration: 250ms;  
+  -webkit-transition-duration: 250ms;
   transition-property: opacity;
-  transition-duration: 250ms;  
+  transition-duration: 250ms;
 }
 .app .add:hover .icon-plus-sign {
   opacity: 1;

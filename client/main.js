@@ -19,8 +19,6 @@ Router.map(function() {
     path: '/:page',
     waitOn: function() {
       var page = this.params.page;
-      Session.set('page', page);
-      
       // Set Pictures upload settings
       document.title = ucwords(page);
       if ((isHd = !!location.href.match(/hd/i))) {
@@ -33,15 +31,15 @@ Router.map(function() {
       // Filter by author
       Session.set('authorFilter', this.params.author);
 
-      // Admin
-      Meteor.subscribe('pages');
-      if (!!Pages.findOne({name: Session.get('page'), secret: this.params.key})) {
-        Session.set('isAdmin', true);
-      }
-
-      return Meteor.subscribe('pictures', page);
+      return [Meteor.subscribe('pictures', page), Meteor.subscribe('pages')];
     },
     data: function() {
+      var page = Pages.findOne({name: this.params.page});
+      Session.set('page', page ? page : { name: '', secret: 'loading' });
+
+      // Admin
+      Session.set('isAdmin', Session.get("page").secret == this.params.key);
+
       return Pictures.find({}, {sort: {author: 1, date: 1, name: 1}});
     }
   });
@@ -104,7 +102,7 @@ var optimizePicture = function(file, callback) {
 
     width = canvas.width;
     height = canvas.height;
-    
+
     megaImage.onrender = function() {
       if (canvas.toBlob) {
         canvas.toBlob(function(blob) {
@@ -155,7 +153,7 @@ Template.picture.largeMode = function() {
 };
 
 Template.picture.page = function() {
-  return Session.get('page');
+  return Session.get('page').name;
 };
 
 Template.picture.validationStatus = function() {
@@ -179,11 +177,11 @@ Template.page.isWaitingForValidation = function() {
 };
 
 Template.page.pageModePublic = function() {
-  return Pages.findOne({name: Session.get('page')}).mode != 'validation' ? 'active' : '';
+  return Session.get('page').mode != 'validation' ? 'active' : '';
 };
 
 Template.page.pageModeValidation = function() {
-  var validation = Pages.findOne({name: Session.get('page')}).mode == 'validation';
+  var validation = Session.get('page').mode == 'validation';
 
   $('body').toggleClass('validation', validation);
   return validation ? 'active' : '';
@@ -199,8 +197,8 @@ Template.page.pictures = function () {
   var categoryLength = this.count();
   var authorFilter = Session.get('authorFilter');
   var isAdmin = Session.get('isAdmin');
-  var isValidated = Pages.findOne({name: Session.get('page')}).mode == 'validation';
-  
+  var isValidated = Session.get('page').mode == 'validation';
+
   this.forEach(function(picture) {
     if ((!authorFilter && (isAdmin || (!isValidated || picture.validated))) || picture.author == authorFilter) {
       if (picture.author != lastCategory) {
@@ -247,7 +245,7 @@ Template.page.email = function () {
 };
 
 Template.page.page = function() {
-  return Session.get('page');
+  return Session.get('page').name;
 };
 
 Template.page.mode = function() {
@@ -299,7 +297,7 @@ Template.picture.events({
       Session.set('busy', 'Rotation de l\'image');
       Meteor.rotateFile(this.name, this._id, this.orientation, 'left', function(err, data) {
         if(err) throw err;
-        
+
         Session.set('busy', false);
       }.bind(this));
     }
@@ -469,7 +467,7 @@ Meteor.deletePage = function(id) {
 
 Meteor.setPageMode = function(mode) {
   Meteor.call('setPageMode',
-              Session.get('page'),
+              Session.get('page').name,
               mode,
               function(error, data) {
     // great
@@ -478,7 +476,7 @@ Meteor.setPageMode = function(mode) {
 
 Meteor.renameAuthor = function(oldName, newName) {
   Meteor.call('renameAuthor',
-              Session.get('page'),
+              Session.get('page').name,
               SendySession.get('author'),
               oldName,
               newName,
@@ -497,7 +495,7 @@ Meteor.toggleValidation = function(id) {
 
 Meteor.rotateFile = function(name, id, orientation, direction, callback) {
   Meteor.call('rotateFile',
-              Session.get('page'),
+              Session.get('page').name,
               SendySession.get('author'),
               name,
               id,
@@ -508,7 +506,7 @@ Meteor.rotateFile = function(name, id, orientation, direction, callback) {
 
 Meteor.deleteFile = function(name, id) {
   Meteor.call('deleteFile',
-              Session.get('page'),
+              Session.get('page').name,
               SendySession.get('author'),
               name,
               id);
@@ -519,7 +517,7 @@ Meteor.saveFile = function(name, blob, metadata, callback) {
 
   fileReader.onload = function(file) {
     Meteor.call('saveFile',
-                Session.get('page'),
+                Session.get('page').name,
                 SendySession.get('author'),
                 name,
                 file.target.result,
@@ -532,7 +530,7 @@ Meteor.saveFile = function(name, blob, metadata, callback) {
 
 Meteor.finalizeUpload = function(count) {
   Meteor.call('finalizeUpload',
-            Session.get('page'),
+            Session.get('page').name,
             SendySession.get('author'),
             SendySession.get('email'),
             count);

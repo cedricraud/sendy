@@ -15,6 +15,7 @@ Meteor.publish('pages', function (page) {
 // Npm
 var require = Npm.require,
     connect = require('connect'),
+    archiver = require('archiver'),
     Fiber = require('fibers'),
     Future = require('fibers/future'),
     fs = require('fs'),
@@ -22,8 +23,7 @@ var require = Npm.require,
     mkdirp = require('mkdirp'),
     moment = require('moment'),
     nodemailer = require('nodemailer'),
-    slug = require('slug'),
-    zipstream = require('zipstream');
+    slug = require('slug');
 
 // Shared Npm
 phantom = require('phantom');
@@ -45,6 +45,11 @@ log = function(message, page, author) {
 Meteor.startup(function () {
   // Say Hello
   log('Hi, I\'m Sendy');
+
+  // Survive to exceptions
+  process.on('uncaughtException', function(err) {
+    log('Caught exception: ' + err);
+  });
 
   root = process.env.SENDY_PICTURES_PATH;
   host = process.env.SENDY_HOST;
@@ -137,7 +142,7 @@ var filesHandler = function(path) {
 };
 
 var downThemAll = function(res, name, files) {
-  var zip = zipstream.createZip({ level: 1 });
+  var zip = archiver.create('zip', { level: 1 });
   res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-disposition', 'attachment;filename="' + name + '.zip"');
   zip.pipe(res);
@@ -146,10 +151,12 @@ var downThemAll = function(res, name, files) {
       var filepath = files.shift();
       var file = filepath.substring(filepath.lastIndexOf('/') + 1);
       var filestream = fs.createReadStream(filepath);
-      zip.addFile(filestream, { name: file, store: true }, zipThemAll);
+      // FIXME: store: true is broken...
+      zip.append(filestream, { name: file, store: false }, zipThemAll);
     }
-    else
+    else {
       zip.finalize();
+    }
   })();
 };
 
@@ -159,16 +166,21 @@ var archiveHandler = function (req, res, next) {
         var url = decodeURIComponent(req.url);
         var parts = url.split('/').map(function(item){return item.split('.');});
         var query = null;
+        var page = Pages.find({name: parts[1][0]}).fetch()[0];
+        var validated = page && (page.mode == 'validation');
+
         if(parts.length == 3 && parts[2].length == 2 && parts[2][1] == 'zip'){
-          // TODO: Detect if validation is enabled
-          query = {validated: true, page:parts[1][0], author:parts[2][0]};
+          query = {page: parts[1][0], author: parts[2][0]};
         }
         if(parts.length == 2 && parts[1].length == 2 && parts[1][1] == 'zip'){
-          query = {validated: true, page:parts[1][0]};
+          query = {page: parts[1][0]};
+        }
+        if (validated) {
+          query.validated = true;
         }
         if (query) {
           var files = [];
-          var pictures = Pictures.find(query);
+          var pictures = Pictures.find(query).fetch();
 
           log('Downloading: ' + (query.author ? query.author : 'Everything!'), query.page);
 

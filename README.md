@@ -19,11 +19,14 @@ Clone the repository, declare the path to the pictures, then simply launch the a
 ```
 $ git clone https://github.com/cedricraud/sendy.git
 $ cd sendy
-$ export SENDY_PICTURES_PATH=<absolute_path_to_upload_folder>
-$ export SENDY_MAILER_EMAIL=<gmail_email_of_sender>
-$ export SENDY_MAILER_PASSWORD=<gmail_password_of_sender>
-$ export SENDY_HOST=<public_host_of_app>
-$ mrt
+$ mrt add iron-router npm --release 0.6.5
+$ meteor add standard-app-packages routepolicy amplify
+$ ./npm_install archiver connect imagemagick mkdirp moment nodemailer fibers phantom slug
+$ export SENDY_PICTURES_PATH=</home/pictures>
+$ export SENDY_MAILER_EMAIL=<sendy@gmail.com>
+$ export SENDY_MAILER_PASSWORD=<password>
+$ export SENDY_HOST=<sendy.io:3000>
+$ mrt --release 0.6.5 --port <3000> --production
 ```
 
 Meteorite will setup Meteor automatically and install all the dependencies of the app.
