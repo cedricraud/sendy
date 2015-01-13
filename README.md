@@ -1,6 +1,6 @@
 # Sendy
 
-[Sendy](http://sendy.io:2013) is the easiest way to share pictures between friends.
+Sendy is the easiest way to share pictures between friends.
 
 Sendy is built with [Meteor](http://www.meteor.com) and can be easily deployed on a private web server.
 
@@ -100,3 +100,7 @@ Meteorite will setup Meteor automatically and install all the dependencies of th
 * Rotate and delete indivisual pictures
 * The author is always displayed on screen
 * Big / Small display mode
+
+## Status
+
+Sendy is not actively maintained.
